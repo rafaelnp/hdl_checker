@@ -23,6 +23,7 @@ from hdl_checker.builders.fallback import Fallback
 from hdl_checker.builders.ghdl import GHDL
 from hdl_checker.builders.msim import MSim
 from hdl_checker.builders.xvhdl import XVHDL
+from hdl_checker.builders.verilator import Verilator
 from hdl_checker.database import Database
 from hdl_checker.parsers.elements.dependency_spec import (
     IncludedPath,
@@ -58,6 +59,7 @@ CLASS_MAP = {
     "VerilogParser": VerilogParser,
     "VhdlDesignUnit": VhdlDesignUnit,
     "VerilogDesignUnit": VerilogDesignUnit,
+    "Verilator": Verilator,
     "VhdlIdentifier": VhdlIdentifier,
     "VhdlParser": VhdlParser,
     "XVHDL": XVHDL,

@@ -34,6 +34,7 @@ from typing import (  # pylint: disable=unused-import
 from .builders.fallback import Fallback
 from .builders.ghdl import GHDL
 from .builders.msim import MSim
+from .builders.verilator import Verilator
 from .builders.xvhdl import XVHDL
 
 from hdl_checker.parser_utils import findRtlSourcesByPath
@@ -56,7 +57,7 @@ except ImportError:  # pragma: no cover
 
 _logger = logging.getLogger(__name__)
 
-AnyValidBuilder = Union[MSim, XVHDL, GHDL]
+AnyValidBuilder = Union[MSim, XVHDL, Verilator, GHDL]
 AnyBuilder = Union[AnyValidBuilder, Fallback]
 
 
@@ -68,6 +69,7 @@ class BuilderName(Enum):
     msim = MSim.builder_name
     xvhdl = XVHDL.builder_name
     ghdl = GHDL.builder_name
+    verilator = Verilator.builder_name
     fallback = Fallback.builder_name
 
 
@@ -79,6 +81,8 @@ def getBuilderByName(name):
         builder = MSim
     elif name == "xvhdl":
         builder = XVHDL
+    elif name == "verilator":
+        builder = Verilator
     elif name == "ghdl":
         builder = GHDL
     else:
@@ -116,6 +120,7 @@ _VUNIT_FLAGS = {
         "2002": ("--std=02",),
         "2008": ("--std=08",),
     },
+    BuilderName.verilator: {"2005": ("+1800-2005ext+sv",), "2009": ("+1800-2009ext+sv",),}
 }  # type: Dict[BuilderName, Dict[str, BuildFlags]]
 
 
@@ -203,5 +208,4 @@ def _getSourcesFromVUnitModule(vunit_module):
 
 __all__ = ["MSim", "XVHDL", "GHDL", "Fallback"]
 
-# This holds the builders in order of preference
 AVAILABLE_BUILDERS = MSim, XVHDL, GHDL, Fallback
