@@ -45,20 +45,27 @@ class Verilator(BaseBuilder):
         BuildFlagScope.all: {
             FileType.verilog: ("-Wall"),
             FileType.systemverilog: ("-Wall", "-sv"),
-        }
+        },
     }
 
     def __init__(self, *args, **kwargs):
-        self._logger.debug("Verilator")
         self._version = ""
         super(Verilator, self).__init__(*args, **kwargs)
+
+    def _shouldIgnoreLine(self, line):
+        pass
 
     def _makeRecords(self, line):
         pass
 
+    def _buildSource(self, path, library, flags=None):
+        pass
+
+    def _createLibrary(self, library):
+        pass
+
     def _checkEnvironment(self):
-        self._logger.debug("Verilator")
-        stdout = runShellCommand(["verilator", "--version"])
+        stdout = runShellCommand("verilator --version", shell=True)
         self._version = re.findall(r"(?<=Verilator)\s+([^\s]+)\s+", stdout[0])[0]
         self._logger.info(
             "Verilator version string: '%s'. " "Version number is '%s'",
@@ -69,7 +76,7 @@ class Verilator(BaseBuilder):
     @staticmethod
     def isAvailable():
         try:
-            runShellCommand(["verilator", "--version"])
+            runShellCommand("verilator --version", shell=True)
             return True
         except OSError:
             return False
