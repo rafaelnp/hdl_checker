@@ -47,6 +47,7 @@ from hdl_checker.builder_utils import (
     AnyBuilder,
     Fallback,
     MSim,
+    Verilator
 )
 from hdl_checker.database import Database
 from hdl_checker.diagnostics import BuilderDiag, DiagType
@@ -72,7 +73,12 @@ _logger = logging.getLogger(__name__)
 TEST_TEMP_PATH = getTestTempPath(__name__)
 SOURCES_PATH = p.join(TEST_TEMP_PATH, "test_builders")
 
-BUILDER_CLASS_MAP = {"msim": MSim, "xvhdl": XVHDL, "ghdl": GHDL, "fallback": Fallback}
+BUILDER_CLASS_MAP = {
+                    "msim": MSim,
+                    "xvhdl": XVHDL,
+                    "verilator", Verilator,
+                    "ghdl": GHDL,
+                    "fallback": Fallback}
 
 
 class _SourceMock(SourceMock):
