@@ -58,9 +58,6 @@ class Verilator(BaseBuilder):
     def _makeRecords(self, line):
         pass
 
-    def _buildSource(self, path, library, flags=None):
-        pass
-
     def _createLibrary(self, library):
         pass
 
@@ -81,9 +78,40 @@ class Verilator(BaseBuilder):
         except OSError:
             return False
 
-    def _checkSyntax(self, path, library, flags=None):
+    def _buildSource(self, path, library, flags=None):
         # type: (Path, Identifier, Optional[BuildFlags]) -> List[str]
         """
         Runs Verilator with syntax check switch
         """
-        return ["verilator", "--lint-only"] + self._getGhdlArgs(path, library, flags)
+        filetype = FileType.fromPath(path)
+
+        if filetype in (FileType.verilog, FileType.systemverilog):
+            self._logger("detected valid file: '%s'", path)
+            return self._buildVerilog(path, library, flags)
+
+        self._logger.error("Unknown file type %s for path '%s'",
+                           filetype, path)
+
+        return ""
+
+    def _buildVerilog(self, path, library, flags=None):
+        # type: (Path, Identifier, Optional[BuildFlags]) -> Iterable[str]
+        """
+        Builds a Verilog/SystemVerilog file
+        """
+        cmd = [
+            "verilator",
+            "--cc",
+            "-O0",
+            p.join(self._work_folder, library.name),
+        ]
+
+        if FileType.fromPath(path) == FileType.systemverilog:
+            cmd += ["-sv"]
+        if flags:  # pragma: no cover
+            cmd += flags
+
+        cmd += [path.name]
+
+        self._logger.info("verilator command line: '%s'", cmd)
+        return runShellCommand(cmd)
