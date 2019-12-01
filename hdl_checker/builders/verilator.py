@@ -80,3 +80,10 @@ class Verilator(BaseBuilder):
             return True
         except OSError:
             return False
+
+    def _checkSyntax(self, path, library, flags=None):
+        # type: (Path, Identifier, Optional[BuildFlags]) -> List[str]
+        """
+        Runs Verilator with syntax check switch
+        """
+        return ["verilator", "--lint-only"] + self._getGhdlArgs(path, library, flags)
