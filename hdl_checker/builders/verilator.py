@@ -66,7 +66,7 @@ class Verilator(BaseBuilder):
         self._version = re.findall(r"(?<=Verilator)\s+([^\s]+)\s+", stdout[0])[0]
         self._logger.info(
             "Verilator version string: '%s'. " "Version number is '%s'",
-            stdout[:-1],
+            stdout,
             self._version,
         )
 
