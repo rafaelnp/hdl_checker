@@ -120,7 +120,12 @@ _VUNIT_FLAGS = {
         "2002": ("--std=02",),
         "2008": ("--std=08",),
     },
-    BuilderName.verilator: {"2005": ("+1800-2005ext+sv",), "2009": ("+1800-2009ext+sv",),}
+    BuilderName.verilator: {
+        "2001": ("+1364-2001ext+v",),
+        "2005": ("+1364-2005ext+v",),
+        "2005": ("+1800-2005ext+sv",),
+        "2009": ("+1800-2009ext+sv",),
+    },
 }  # type: Dict[BuilderName, Dict[str, BuildFlags]]
 
 
