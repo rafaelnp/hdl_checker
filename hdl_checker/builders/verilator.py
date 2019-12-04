@@ -55,6 +55,9 @@ class Verilator(BaseBuilder):
     }
 
     def __init__(self, *args, **kwargs):
+        """
+        class constructor
+        """
         self._version = ""
         super(Verilator, self).__init__(*args, **kwargs)
 
@@ -62,6 +65,9 @@ class Verilator(BaseBuilder):
         pass
 
     def _makeRecords(self, line):
+        """
+        gather the warning/error information to be shown to the  user
+        """
         # type: (str) -> Iterable[BuilderDiag]
         for match in self._stdout_message_scanner(line):  # type: ignore
             info = match.groupdict()
@@ -99,6 +105,9 @@ class Verilator(BaseBuilder):
 
     @staticmethod
     def isAvailable():
+        """
+        check if verilator is installed/present in the system $PATH
+        """
         try:
             runShellCommand("verilator --version", shell=True)
             return True
