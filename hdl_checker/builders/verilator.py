@@ -40,6 +40,12 @@ class Verilator(BaseBuilder):
     builder_name = "verilator"
     file_types = {FileType.verilog, FileType.systemverilog}
 
+    # Verilator specific class properties
+    _stdout_message_scanner = re.compile(
+        r"""^%(Error|Warning):\s.+""",
+        flags=re.VERBOSE,
+    ).finditer
+
     # Default build flags
     default_flags = {
         BuildFlagScope.all: {
@@ -56,12 +62,33 @@ class Verilator(BaseBuilder):
         pass
 
     def _makeRecords(self, line):
-        pass
+        # type: (str) -> Iterable[BuilderDiag]
+        for match in self._stdout_message_scanner(line):  # type: ignore
+            info = match.groupdict()
+
+            self._logger.debug("Parsed dict: %s", repr(info))
+
+            filename = info.get("filename")
+            line_number = info.get("line_number")
+            column_number = info.get("column_number")
+
+            yield BuilderDiag(
+                builder_name=self.builder_name,
+                text=info.get("error_message", None),
+                severity=DiagType.WARNING if info["is_warning"] else DiagType.ERROR,
+                filename=None if filename is None else Path(filename),
+                line_number=None if line_number is None else int(line_number) - 1,
+                column_number=None if column_number is None else int(column_number) - 1,
+            )
+
 
     def _createLibrary(self, library):
         pass
 
     def _checkEnvironment(self):
+        """
+        check and print the builder version
+        """
         stdout = runShellCommand("verilator --version", shell=True)
         self._version = re.findall(r"(?<=Verilator)\s+([^\s]+)\s+", stdout[0])[0]
         self._logger.info(
