@@ -42,15 +42,22 @@ class Verilator(BaseBuilder):
 
     # Verilator specific class properties
     _stdout_message_scanner = re.compile(
-        r"""^%(Error|Warning):\s.+""",
+        r"""^\%(?P<severity>((\w+\-\w+)|(\w+)))\:
+        \s*(?P<filename>\w+\.(v|sv))\:
+        (?P<line_number>\d+)\:\s*
+        (?P<error_message>(.*\n.*\n.*)|(.*\n.*))""",
         flags=re.VERBOSE,
     ).finditer
 
     # Default build flags
     default_flags = {
+        BuildFlagScope.single: {
+            FileType.verilog: ("--lint-only -Wpedantic -Wall"),
+            FileType.systemverilog: ("--lint-only -Wall -Wpedantic ", "-sv"),
+        },
         BuildFlagScope.all: {
-            FileType.verilog: ("-Wall"),
-            FileType.systemverilog: ("-Wall", "-sv"),
+            FileType.verilog: ("--lint-only -Wpedantic -Wall"),
+            FileType.systemverilog: ("--lint-only -Wall -Wpedantic ", "-sv"),
         },
     }
 
@@ -74,22 +81,28 @@ class Verilator(BaseBuilder):
 
             self._logger.debug("Parsed dict: %s", repr(info))
 
-            filename = info.get("filename")
-            line_number = info.get("line_number")
-            column_number = info.get("column_number")
+            filename = info.get("filename", None)
+            line_number = info.get("line_number", None)
+
+            if info.get("severity", None) in ("Warning", "Error"):
+                severity = DiagType.WARNING
+            else:
+                severity = DiagType.ERROR
 
             yield BuilderDiag(
                 builder_name=self.builder_name,
                 text=info.get("error_message", None),
-                severity=DiagType.WARNING if info["is_warning"] else DiagType.ERROR,
                 filename=None if filename is None else Path(filename),
+                severity=severity,
                 line_number=None if line_number is None else int(line_number) - 1,
-                column_number=None if column_number is None else int(column_number) - 1,
             )
 
-
     def _createLibrary(self, library):
-        pass
+        if p.exists(p.join(self._work_folder, library.name)):
+            self._logger.debug("Path for library '%s' already exists", library)
+            return
+        self._mapLibrary(library)
+        self._logger.debug("Added and mapped library '%s'", library)
 
     def _checkEnvironment(self):
         """
