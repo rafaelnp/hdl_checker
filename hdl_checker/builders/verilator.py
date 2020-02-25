@@ -51,13 +51,9 @@ class Verilator(BaseBuilder):
 
     # Default build flags
     default_flags = {
-        BuildFlagScope.single: {
-            FileType.verilog: ("--lint-only -Wpedantic -Wall"),
-            FileType.systemverilog: ("--lint-only -Wall -Wpedantic ", "-sv"),
-        },
         BuildFlagScope.all: {
-            FileType.verilog: ("--lint-only -Wpedantic -Wall"),
-            FileType.systemverilog: ("--lint-only -Wall -Wpedantic ", "-sv"),
+            FileType.verilog: ("--lint-only", "-Wpedantic", "-Wall"),
+            FileType.systemverilog: ("--lint-only", "-Wall", "-Wpedantic ", "-sv"),
         },
     }
 
@@ -84,32 +80,32 @@ class Verilator(BaseBuilder):
             filename = info.get("filename", None)
             line_number = info.get("line_number", None)
 
-            if info.get("severity", None) in ("Warning", "Error"):
-                severity = DiagType.WARNING
-            else:
+            if info["Error"]:
                 severity = DiagType.ERROR
+            else:
+                severity = DiagType.WARNING
 
             yield BuilderDiag(
                 builder_name=self.builder_name,
                 text=info.get("error_message", None),
                 filename=None if filename is None else Path(filename),
-                severity=severity,
+                severity=None if severity is None else severity,
                 line_number=None if line_number is None else int(line_number) - 1,
             )
 
+    def _mapLibrary(self, library):
+        pass
+
     def _createLibrary(self, library):
-        if p.exists(p.join(self._work_folder, library.name)):
-            self._logger.debug("Path for library '%s' already exists", library)
-            return
-        self._mapLibrary(library)
-        self._logger.debug("Added and mapped library '%s'", library)
+        pass
 
     def _checkEnvironment(self):
         """
         check and print the builder version
         """
-        stdout = runShellCommand("verilator --version", shell=True)
-        self._version = re.findall(r"(?<=Verilator)\s+([^\s]+)\s+", stdout[0])[0]
+        stdout = runShellCommand(["/bin/sh", "verilator", "--version"])
+        self._version = re.findall(r"(?<=Verilator)\s+([^\s]+)\s+", stdout[0])
+
         self._logger.info(
             "Verilator version string: '%s'. " "Version number is '%s'",
             stdout,
@@ -133,9 +129,9 @@ class Verilator(BaseBuilder):
         Runs Verilator with syntax check switch
         """
         filetype = FileType.fromPath(path)
+        self._logger.info("detected valid file: '%s'", path)
 
         if filetype in (FileType.verilog, FileType.systemverilog):
-            self._logger("detected valid file: '%s'", path)
             return self._buildVerilog(path, library, flags)
 
         self._logger.error("Unknown file type %s for path '%s'",
@@ -149,10 +145,7 @@ class Verilator(BaseBuilder):
         Builds a Verilog/SystemVerilog file
         """
         cmd = [
-            "verilator",
-            "--cc",
-            "-O0",
-            p.join(self._work_folder, library.name),
+            "verilator_bin",
         ]
 
         if FileType.fromPath(path) == FileType.systemverilog:
