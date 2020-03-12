@@ -211,6 +211,6 @@ def _getSourcesFromVUnitModule(vunit_module):
         return list(vunit_project.get_source_files())
 
 
-__all__ = ["MSim", "XVHDL", "GHDL", "Fallback"]
+__all__ = ["Verilator", "XVHDL", "GHDL", "Fallback"]
 
-AVAILABLE_BUILDERS = MSim, XVHDL, GHDL, Fallback
+AVAILABLE_BUILDERS = Verilator, XVHDL, GHDL, Fallback
