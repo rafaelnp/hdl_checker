@@ -57,7 +57,7 @@ except ImportError:  # pragma: no cover
 
 _logger = logging.getLogger(__name__)
 
-AnyValidBuilder = Union[MSim, XVHDL, Verilator, GHDL]
+AnyValidBuilder = Union[Verilator, MSim, XVHDL, GHDL]
 AnyBuilder = Union[AnyValidBuilder, Fallback]
 
 
@@ -79,12 +79,12 @@ def getBuilderByName(name):
     # builder attribute
     if name == "msim":
         builder = MSim
-    elif name == "xvhdl":
-        builder = XVHDL
     elif name == "verilator":
         builder = Verilator
     elif name == "ghdl":
         builder = GHDL
+    elif name == "xvhdl":
+        builder = XVHDL
     else:
         builder = Fallback
 
@@ -121,10 +121,11 @@ _VUNIT_FLAGS = {
         "2008": ("--std=08",),
     },
     BuilderName.verilator: {
-        "2001": ("+1364-2001ext+v",),
-        "2005": ("+1364-2005ext+v",),
-        "2005": ("+1800-2005ext+sv",),
-        "2009": ("+1800-2009ext+sv",),
+        "2001":   ("+1364-2001ext+v",),
+        "2005":   ("+1364-2005ext+v",),
+        "2009":   ("+1800-2009ext+sv",),
+        "2012":   ("+1800-2012ext+sv",),
+        "2017":   ("+1800-2017ext+sv",),
     },
 }  # type: Dict[BuilderName, Dict[str, BuildFlags]]
 
