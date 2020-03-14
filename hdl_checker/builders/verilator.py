@@ -103,7 +103,7 @@ class Verilator(BaseBuilder):
         """
         check and print the builder version
         """
-        stdout = runShellCommand(["/bin/sh", "verilator", "--version"])
+        stdout = runShellCommand(["verilator_bin", "--version"])
         self._version = re.findall(r"(?<=Verilator)\s+([^\s]+)\s+", stdout[0])
 
         self._logger.info(
@@ -118,7 +118,7 @@ class Verilator(BaseBuilder):
         check if verilator is installed/present in the system $PATH
         """
         try:
-            runShellCommand("verilator --version", shell=True)
+            runShellCommand(["verilator_bin", "--version"])
             return True
         except OSError:
             return False
