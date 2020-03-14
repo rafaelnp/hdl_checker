@@ -15,15 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with HDL Checker.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ubuntu:19.04
+FROM suoto/xsim:2018.3
 
 ENV BUILDERS /builders
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN dpkg --add-architecture i386
 
-ENV PACKAGES="python2         \
-              ca-certificates \
+ENV PACKAGES="ca-certificates \
               g++-multilib    \
               gcc             \
               gcc-multilib    \
@@ -33,13 +32,16 @@ ENV PACKAGES="python2         \
               lib32stdc++6    \
               lib32z1         \
               libtcl8.6       \
-              libtinfo5       \
               make            \
-              python2-dev     \
+              python2.7       \
+              python2.7-dev   \
               python3-pip     \
+              python3.6       \
+              python3.6-dev   \
               python3.7       \
+              python3.7-dev   \
               python3.8       \
-              verilator       \
+              python3.8-dev   \
               wget            \
               zlib1g-dev"
 
@@ -63,14 +65,14 @@ RUN ../configure --prefix=$BUILDERS/ghdl && \
     make -j                              && \
     make install
 
-RUN apt-get purge -qq ca-certificates make zlib1g-dev && \
-    apt-get clean                                     && \
+RUN apt-get purge -qq make zlib1g-dev && \
+    apt-get clean                     && \
     apt-get autoclean
 RUN rm -rf /tmp/ghdl
 
 RUN $BUILDERS/ghdl/bin/ghdl --version
 
-# ModelSim and XVHDL will be copied
+# ModelSim will be copied
 COPY msim $BUILDERS/msim
 COPY xvhdl $BUILDERS/xvhdl
 COPY verilator $BUILDERS/verilator
@@ -78,7 +80,7 @@ COPY verilator $BUILDERS/verilator
 # Test installations
 RUN "$BUILDERS/ghdl/bin/ghdl" --version
 RUN "$BUILDERS/msim/modelsim_ase/linuxaloem/vcom" -version
-RUN "$BUILDERS/xvhdl/bin/xvhdl" -version
+RUN "/xsim/bin/xvhdl" -version
 RUN "$BUILDERS/verilator/verilator" --version
 
 VOLUME /hdl_checker
