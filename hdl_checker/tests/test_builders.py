@@ -76,7 +76,7 @@ SOURCES_PATH = p.join(TEST_TEMP_PATH, "test_builders")
 BUILDER_CLASS_MAP = {
                     "msim": MSim,
                     "xvhdl": XVHDL,
-                    "verilator", Verilator,
+                    "verilator": Verilator,
                     "ghdl": GHDL,
                     "fallback": Fallback}
 
