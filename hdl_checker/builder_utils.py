@@ -212,6 +212,7 @@ def _getSourcesFromVUnitModule(vunit_module):
         return list(vunit_project.get_source_files())
 
 
-__all__ = ["Verilator", "XVHDL", "GHDL", "Fallback"]
+__all__ = ["Verilator", "MSim", "XVHDL", "GHDL", "Fallback"]
 
-AVAILABLE_BUILDERS = Verilator, XVHDL, GHDL, Fallback
+# This holds the builders in order of preference
+AVAILABLE_BUILDERS = Verilator, MSim, XVHDL, GHDL, Fallback
