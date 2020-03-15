@@ -414,6 +414,38 @@ class TestBuilder(TestCase):
             ],
         )
 
+    @parameterized.parameterized.expand(
+        [
+            ("/some/file/with/abs/path.vhd",),
+            ("/some/file/with/abs/path.v",),
+            ("some/file/with/relative/path.v",),
+            ("some_file_on_same_level.v",),
+        ]
+    )
+    def test_ParseVerilatorResult(self, path):
+        # type: (...) -> Any
+        if not isinstance(self.builder, Verilator):
+            raise unittest2.SkipTest("Verilator only test")
+
+        self.assertEqual(
+            list(
+                self.builder._makeRecords(
+                    '** Error: %s(21): near "EOF": (vcom-1576) ' "expecting ';'." % path
+                )
+            ),
+            [
+                BuilderDiag(
+                    builder_name=self.builder_name,
+                    text="near \"EOF\": expecting ';'.",
+                    filename=Path(path),
+                    line_number=20,
+                    error_code=None,
+                    severity=DiagType.ERROR,
+                )
+            ],
+        )
+
+
     @patch("hdl_checker.database.Database.getLibrary", return_value=Identifier("work"))
     def test_VhdlCompilation(self, *args):
         # type: (...) -> Any
@@ -478,6 +510,7 @@ class TestBuilder(TestCase):
     def test_CatchAKnownError(self):
         # type: (...) -> Any
         source = _source("source_with_error.vhd")
+        sourceVerilog = _source("source_with_error.v")
 
         records, rebuilds = self.builder.build(
             source, Identifier("lib"), forced=True, scope=BuildFlagScope.single
@@ -543,6 +576,19 @@ class TestBuilder(TestCase):
                         severity=DiagType.ERROR,
                     )
                 },
+            ]
+        elif self.builder_name == "verilator":
+            expected = [
+                {
+                    BuilderDiag(
+                        filename=sourceVerilog,
+                        builder_name=self.builder_name,
+                        text="syntax error, unexpected endmodule, expecting ',' or ';'",
+                        line_number=11,
+                        error_code="%Error: Cannot continue",
+                        severity=DiagType.ERROR,
+                    )
+                }
             ]
 
         if not isinstance(self.builder, Fallback):
